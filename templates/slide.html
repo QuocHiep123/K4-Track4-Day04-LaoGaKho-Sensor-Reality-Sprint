@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Slide Báo Cáo 1 Trang: ADAS Camera Degradation Health Score (T1)</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-slide: #090c12;
+            --card-bg: #121824;
+            --border: rgba(255, 255, 255, 0.09);
+            --accent-blue: #0084ff;
+            --accent-green: #00e676;
+            --accent-yellow: #ffb300;
+            --accent-red: #ff3d00;
+            --text-main: #f3f6fa;
+            --text-muted: #8e9eaf;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-slide);
+            color: var(--text-main);
+            min-height: 100vh;
+            padding: 16px 24px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        /* Top Bar */
+        .slide-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 12px;
+            margin-bottom: 14px;
+        }
+
+        .header-title-box {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .badge-t1 {
+            background: linear-gradient(135deg, #0084ff, #00d2ff);
+            color: #fff;
+            font-weight: 800;
+            font-size: 13px;
+            padding: 4px 10px;
+            border-radius: 6px;
+        }
+
+        .slide-title {
+            font-size: 20px;
+            font-weight: 800;
+            letter-spacing: -0.3px;
+        }
+
+        .slide-sub {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .header-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-action {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid var(--border);
+            color: #fff;
+            padding: 6px 14px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+        }
+
+        .btn-action:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .btn-action.primary {
+            background: var(--accent-blue);
+            border-color: var(--accent-blue);
+        }
+
+        /* 5-Block Grid Layout (Section 6 Standard) */
+        .slide-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1.25fr;
+            grid-template-rows: auto auto;
+            gap: 14px;
+            flex: 1;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 10px;
+            font-size: 13px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+            padding-bottom: 8px;
+        }
+
+        .card-header.c-problem { color: #ff7675; }
+        .card-header.c-method { color: #74b9ff; }
+        .card-header.c-benchmark { color: #55efc4; }
+        .card-header.c-failure { color: #fdcb6e; }
+        .card-header.c-decision { color: #a29bfe; }
+
+        .card-content {
+            font-size: 12.5px;
+            line-height: 1.5;
+            color: #d8e3ed;
+            flex: 1;
+        }
+
+        .card-content ul {
+            padding-left: 18px;
+            margin: 6px 0;
+        }
+
+        .card-content li {
+            margin-bottom: 4px;
+        }
+
+        .highlight {
+            color: #fff;
+            font-weight: 700;
+        }
+
+        .tag-pill {
+            display: inline-block;
+            padding: 2px 7px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 700;
+            background: rgba(255, 255, 255, 0.08);
+            margin: 2px 2px;
+        }
+
+        /* Benchmark Media Carousel / Images */
+        .media-preview {
+            width: 100%;
+            height: 140px;
+            border-radius: 8px;
+            object-fit: cover;
+            margin-top: 8px;
+            border: 1px solid var(--border);
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .media-preview:hover {
+            transform: scale(1.02);
+        }
+
+        /* Mini Table */
+        .mini-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 11px;
+            margin-top: 8px;
+        }
+
+        .mini-table th, .mini-table td {
+            padding: 4px 6px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            text-align: center;
+        }
+
+        .mini-table th {
+            background: rgba(255, 255, 255, 0.05);
+            font-weight: 700;
+            color: #a0b2c6;
+        }
+
+        /* Speaker Pitch Notes Drawer */
+        .notes-drawer {
+            background: #182232;
+            border: 1px solid var(--accent-blue);
+            border-radius: 10px;
+            padding: 12px 18px;
+            margin-top: 14px;
+            font-size: 12px;
+            display: none;
+            box-shadow: 0 8px 30px rgba(0, 132, 255, 0.25);
+        }
+
+        .notes-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin-top: 8px;
+        }
+
+        .note-col {
+            background: rgba(0, 0, 0, 0.25);
+            padding: 8px 12px;
+            border-radius: 6px;
+            border-left: 3px solid var(--accent-blue);
+        }
+
+        .note-time {
+            font-weight: 800;
+            color: var(--accent-yellow);
+            font-size: 11px;
+        }
+
+        .note-text {
+            color: #cfddec;
+            margin-top: 4px;
+            font-size: 11.5px;
+            line-height: 1.4;
+        }
+
+        /* Fullscreen Modal for Enlarged Plots */
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(8px);
+            z-index: 200;
+            justify-content: center;
+            align-items: center;
+            padding: 30px;
+        }
+
+        .modal img {
+            max-width: 90vw;
+            max-height: 90vh;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
+        }
+    </style>
+</head>
+<body>
+
+    <header class="slide-header">
+        <div class="header-title-box">
+            <span class="badge-t1">SLIDE BÁO CÁO 1 TRANG</span>
+            <div>
+                <h1 class="slide-title">ADAS Camera Degradation Health Score</h1>
+                <div class="slide-sub">nuScenes-C / KITTI-C Robustness Benchmark & Sensor Down-weighting Policy</div>
+            </div>
+        </div>
+        <div class="header-buttons">
+            <button class="btn-action" onclick="toggleNotes()">🎙️ Kịch bản Pitch 3-5 Phút</button>
+            <a href="/" class="btn-action">💻 Quay lại Live Demo</a>
+            <button class="btn-action primary" onclick="toggleFullscreen()">⛶ Toàn màn hình (F11)</button>
+        </div>
+    </header>
+
+    <!-- 5-Block Master Slide Layout -->
+    <div class="slide-grid">
+        
+        <!-- 1. PROBLEM -->
+        <div class="card">
+            <div class="card-header c-problem">
+                <span>1. PROBLEM (Vấn đề & Bối cảnh)</span>
+            </div>
+            <div class="card-content">
+                <p><span class="highlight">Hệ thống:</span> Xe tự hành ADAS Cấp độ L2+ / L3.</p>
+                <p><span class="highlight">Cảm biến mục tiêu:</span> Camera RGB đơn kính lái (Windshield Camera).</p>
+                <ul style="margin-top: 6px;">
+                    <li><strong>5 dạng suy giảm thực tế:</strong> Chói nắng hoàng hôn (Glare), Đêm tối (Shot Noise), Xóc rung (Motion Blur), Mưa mù (Rain/Fog), Bùn bắn (Mud Soiling).</li>
+                    <li><strong>Rủi ro chí mạng:</strong> AI (YOLO/DETR) mù quáng xử lý frame suy giảm → sinh ra <em>bỏ sót người đi bộ</em> (Missed Detection) hoặc <em>phanh gấp oan</em> (Phantom Braking).</li>
+                </ul>
+                <div style="margin-top: 8px;">
+                    <span class="tag-pill" style="color: #ff7675; border: 1px solid #ff7675;">Cần module IQA &lt; 3ms</span>
+                    <span class="tag-pill">Pre-filter trước AI</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. METHOD -->
+        <div class="card">
+            <div class="card-header c-method">
+                <span>2. METHOD (Phương pháp & Thuật toán)</span>
+            </div>
+            <div class="card-content">
+                <p><span class="highlight">Chuẩn nghiên cứu:</span> nuScenes-C / KITTI-C (<em>Dong et al., CVPR 2023</em>).</p>
+                <p><span class="highlight">Mô hình:</span> No-Reference IQA (tự đánh giá không cần ảnh chuẩn):</p>
+                <ul>
+                    <li><strong>Độ sắc nét:</strong> Laplacian Variance có Gaussian pre-filter (3×3).</li>
+                    <li><strong>Phơi sáng:</strong> Tỷ lệ Clipping chói (&gt;245) và sập tối (&lt;15).</li>
+                    <li><strong>Lượng thông tin:</strong> Shannon Entropy + RMS Contrast.</li>
+                    <li><strong>Bùn thấu kính:</strong> Lưới 6×6 Sobel patch energy loss.</li>
+                </ul>
+                <p style="margin-top: 6px;"><span class="highlight">Hàm Bottleneck:</span> H = 100 × min(S_sharp, S_exp, S_info)<sup>0.4</sup> × (trung bình)<sup>0.6</sup> (chỉ cần 1 yếu tố sụp đổ → Health Score rơi về 0 ngay lập tức).</p>
+            </div>
+        </div>
+
+        <!-- 3. BENCHMARK (Takes full right column) -->
+        <div class="card" style="grid-row: span 2;">
+            <div class="card-header c-benchmark">
+                <span>3. BENCHMARK (Thực nghiệm & Số liệu)</span>
+            </div>
+            <div class="card-content">
+                <p><span class="highlight">Cấu hình:</span> 3 scenes đường phố ADAS, 5 dạng hư hại, 5 cấp độ (nuScenes-C Level 1 - 5), mô hình YOLOv8n.</p>
+                
+                <!-- Numerical Summary Table -->
+                <table class="mini-table">
+                    <thead>
+                        <tr>
+                            <th>Tình trạng</th>
+                            <th>Cấp độ</th>
+                            <th>Health</th>
+                            <th>Trạng thái</th>
+                            <th>Trọng số</th>
+                            <th>Vật thể giữ</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr style="color: #55efc4; font-weight: bold;">
+                            <td>Clean Base</td>
+                            <td>-</td>
+                            <td>92.1%</td>
+                            <td>HEALTHY</td>
+                            <td>1.00</td>
+                            <td>6 (100%)</td>
+                        </tr>
+                        <tr>
+                            <td>Sun Glare</td>
+                            <td>Lvl 3</td>
+                            <td style="color: #ff7675;">17.1%</td>
+                            <td>CRITICAL</td>
+                            <td>0.00</td>
+                            <td>6 (100%)</td>
+                        </tr>
+                        <tr>
+                            <td>Sun Glare</td>
+                            <td>Lvl 5</td>
+                            <td style="color: #ff7675;">2.7%</td>
+                            <td>CRITICAL</td>
+                            <td>0.00</td>
+                            <td>1 (17%)</td>
+                        </tr>
+                        <tr>
+                            <td>Darkness</td>
+                            <td>Lvl 4</td>
+                            <td style="color: #ff7675;">32.3%</td>
+                            <td>CRITICAL</td>
+                            <td>0.00</td>
+                            <td>3 (50%)</td>
+                        </tr>
+                        <tr>
+                            <td>Motion Blur</td>
+                            <td>Lvl 4</td>
+                            <td style="color: #ff7675;">20.4%</td>
+                            <td>CRITICAL</td>
+                            <td>0.00</td>
+                            <td>3 (50%)</td>
+                        </tr>
+                        <tr>
+                            <td>Mud Soiling</td>
+                            <td>Lvl 5</td>
+                            <td style="color: #fdcb6e;">47.8%</td>
+                            <td>DEGRADED</td>
+                            <td>0.29</td>
+                            <td>4 (67%)</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <p style="margin-top: 10px; font-weight: 700; color: #55efc4;">Đồ thị phân tích tương quan (Nhấp để phóng to):</p>
+                <img src="/outputs/health_vs_confidence.png" class="media-preview" alt="Health vs Confidence" onclick="openModal('/outputs/health_vs_confidence.png')">
+                <img src="/outputs/hud_comparison.png" class="media-preview" style="height: 105px; margin-top: 6px;" alt="HUD Comparison" onclick="openModal('/outputs/hud_comparison.png')">
+            </div>
+        </div>
+
+        <!-- 4. FAILURE DISCOVERY -->
+        <div class="card">
+            <div class="card-header c-failure">
+                <span>4. FAILURE DISCOVERY (Phát hiện khoa học đắt giá)</span>
+            </div>
+            <div class="card-content">
+                <p><span class="highlight">Bẫy toán học của Laplacian kinh điển:</span></p>
+                <ul>
+                    <li>Khi xe chạy ban đêm (Darkness), cảm biến tăng ISO sinh ra <em>High-ISO Shot Noise</em>.</li>
+                    <li>Laplacian thông thường coi hạt nhiễu là cạnh nét → Điểm Laplacian vọt lên <strong>3738.1</strong> (cao hơn cả ban ngày rõ nét 3619.1)!</li>
+                </ul>
+                <p style="margin-top: 6px;"><span class="highlight">Giải pháp đột phá của nhóm:</span> Áp dụng bộ lọc <strong>Gaussian Pre-filter (3×3, σ=0.8)</strong> trước khi tính vi phân. Kết quả: triệt tiêu nhiễu 1 pixel, điểm đêm sụp về đúng <strong>95.4</strong>.</p>
+            </div>
+        </div>
+
+        <!-- 5. ENGINEERING DECISIONS -->
+        <div class="card">
+            <div class="card-header c-decision">
+                <span>5. ENGINEERING DECISION (Quyết định trên xe ADAS)</span>
+            </div>
+            <div class="card-content">
+                <ul>
+                    <li><strong>Hiệu năng siêu tốc:</strong> Chạy mất <strong>~2.3 ms</strong> trên GPU nhúng (Jetson AGX Orin), hoàn toàn đáp ứng ngân sách 30-60 FPS thời gian thực.</li>
+                    <li><strong>Luật hạ trọng số (Down-weight):</strong> Khi H &lt; 70%, hạ trọng số camera xuống 0.3 - 0.4, dồn quyền quyết định sang Radar FMCW 77GHz &amp; LiDAR.</li>
+                    <li><strong>Cơ chế Fallback &amp; Safe Stop:</strong> Khi H &lt; 42% liên tục 3 frames: ngắt Autopilot, kích hoạt cảnh báo Takeover Request (rung vô lăng + còi). Nếu tài xế không phản ứng trong 4 giây → Bật đèn khẩn cấp tấp lề (Safe Stop).</li>
+                </ul>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Pitch Speaker Notes Drawer -->
+    <div class="notes-drawer" id="notes-drawer">
+        <div style="font-weight: 800; font-size: 13px; color: var(--accent-yellow);">🎙️ KỊCH BẢN THUYẾT TRÌNH PITCH 3-5 PHÚT (CHO PRESENTER):</div>
+        <div class="notes-grid">
+            <div class="note-col">
+                <div class="note-time">[0:00 - 0:45] Problem</div>
+                <div class="note-text">Xe ADAS tin camera mù quáng. Thực tế gặp chói nắng, bùn bẩn, mưa giông $\rightarrow$ Bỏ sót vật thể hoặc phanh gấp oan. Cần "bác sĩ khám mắt" chạy trước AI.</div>
+            </div>
+            <div class="note-col">
+                <div class="note-time">[0:45 - 1:45] Method</div>
+                <div class="note-text">Dùng No-Reference IQA theo chuẩn nuScenes-C. Đo 4 chỉ số: Nét, Phơi sáng, Entropy, Bùn bẩn. Công thức Bottleneck: 1 chỉ số mù là điểm rơi ngay lập tức.</div>
+            </div>
+            <div class="note-col">
+                <div class="note-time">[1:45 - 3:00] Discovery</div>
+                <div class="note-text">Bẫy toán học: Cảm biến đẩy ISO ban đêm làm Laplacian tưởng ảnh cực nét (3738). Nhóm giải quyết bằng Gaussian 3x3 đưa về đúng 95.4.</div>
+            </div>
+            <div class="note-col">
+                <div class="note-time">[3:00 - 4:00] Engineering</div>
+                <div class="note-text">Tốc độ cực nhanh 2.3ms trên Jetson Orin. Dưới 70% down-weight camera sang Radar/LiDAR; dưới 42% ngắt tự hành bắt tài xế tiếp quản hoặc Safe Stop.</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Enlarged Plots -->
+    <div class="modal" id="image-modal" onclick="closeModal()">
+        <img id="modal-img" src="" alt="Enlarged Visual">
+    </div>
+
+    <script>
+        function toggleNotes() {
+            const drawer = document.getElementById('notes-drawer');
+            drawer.style.display = drawer.style.display === 'block' ? 'none' : 'block';
+        }
+
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => console.log(err));
+            } else {
+                document.exitFullscreen().catch(err => console.log(err));
+            }
+        }
+
+        function openModal(src) {
+            document.getElementById('modal-img').src = src;
+            document.getElementById('image-modal').style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('image-modal').style.display = 'none';
+        }
+    </script>
+</body>
+</html>

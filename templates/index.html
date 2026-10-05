@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ADAS Camera Health & Degradation Monitor (Topic T1)</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #0a0d14;
+            --surface-card: #121824;
+            --surface-card-hover: #172030;
+            --border-color: rgba(255, 255, 255, 0.08);
+            --accent-blue: #0084ff;
+            --accent-green: #00e676;
+            --accent-yellow: #ffb300;
+            --accent-red: #ff3d00;
+            --text-main: #f0f4f8;
+            --text-muted: #8a99ad;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        /* Top Navbar */
+        header {
+            background: rgba(18, 24, 36, 0.85);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border-color);
+            padding: 14px 28px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-badge {
+            background: linear-gradient(135deg, #0084ff, #00c6ff);
+            color: #fff;
+            font-weight: 800;
+            font-size: 13px;
+            padding: 4px 10px;
+            border-radius: 6px;
+            letter-spacing: 0.5px;
+        }
+
+        .logo-title {
+            font-size: 17px;
+            font-weight: 700;
+            letter-spacing: -0.3px;
+        }
+
+        .logo-sub {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-left: 4px;
+        }
+
+        .nav-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn-slide {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: linear-gradient(135deg, #ff6b6b, #ff8e53);
+            color: #fff;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 13px;
+            padding: 8px 18px;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 14px rgba(255, 107, 107, 0.3);
+        }
+
+        .btn-slide:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 18px rgba(255, 107, 107, 0.45);
+        }
+
+        /* Main Workspace Layout */
+        .container {
+            display: grid;
+            grid-template-columns: 360px 1fr;
+            gap: 24px;
+            padding: 24px 28px;
+            flex: 1;
+            max-width: 1700px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        @media (max-width: 1024px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Sidebar Controls */
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .panel {
+            background: var(--surface-card);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            padding: 20px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+        }
+
+        .panel-title {
+            font-size: 14px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: #9cb1cc;
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Presets Grid */
+        .presets-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+
+        .preset-btn {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 10px;
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.2s;
+        }
+
+        .preset-btn:hover, .preset-btn.active {
+            background: rgba(0, 132, 255, 0.15);
+            border-color: var(--accent-blue);
+            color: #fff;
+        }
+
+        /* File Upload */
+        .upload-dropzone {
+            border: 2px dashed rgba(255, 255, 255, 0.15);
+            border-radius: 12px;
+            padding: 16px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        .upload-dropzone:hover {
+            border-color: var(--accent-blue);
+            background: rgba(0, 132, 255, 0.05);
+        }
+
+        .upload-dropzone input {
+            display: none;
+        }
+
+        .upload-icon {
+            font-size: 24px;
+            margin-bottom: 6px;
+        }
+
+        .upload-text {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        /* Degradation Options */
+        .deg-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 18px;
+        }
+
+        .deg-btn {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 10px 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+
+        .deg-btn:hover {
+            background: rgba(255, 255, 255, 0.07);
+        }
+
+        .deg-btn.active {
+            background: rgba(0, 132, 255, 0.18);
+            border-color: var(--accent-blue);
+            color: #fff;
+        }
+
+        .deg-btn.full-span {
+            grid-column: span 2;
+        }
+
+        /* Slider */
+        .slider-wrapper {
+            margin-bottom: 16px;
+        }
+
+        .slider-header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            margin-bottom: 8px;
+        }
+
+        .severity-badge {
+            font-weight: 700;
+            color: var(--accent-yellow);
+        }
+
+        input[type=range] {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            outline: none;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--accent-blue);
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(0, 132, 255, 0.6);
+        }
+
+        .toggle-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 13px;
+            padding: 8px 0;
+            cursor: pointer;
+        }
+
+        /* Main Viewport & HUD */
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .hud-card {
+            background: var(--surface-card);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            padding: 16px;
+            position: relative;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
+        }
+
+        .view-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+
+        .view-tab {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+            padding: 6px 14px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .view-tab.active {
+            background: var(--accent-blue);
+            border-color: var(--accent-blue);
+            color: #fff;
+        }
+
+        .viewport {
+            background: #000;
+            border-radius: 10px;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            min-height: 440px;
+        }
+
+        .viewport img {
+            max-width: 100%;
+            max-height: 580px;
+            object-fit: contain;
+            display: block;
+            border-radius: 8px;
+        }
+
+        .spinner {
+            display: none;
+            position: absolute;
+            width: 44px;
+            height: 44px;
+            border: 4px solid rgba(255, 255, 255, 0.15);
+            border-top-color: var(--accent-blue);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Metrics & Telemetry Grid */
+        .telemetry-grid {
+            display: grid;
+            grid-template-columns: 240px 1fr 1fr;
+            gap: 16px;
+        }
+
+        @media (max-width: 1200px) {
+            .telemetry-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .gauge-card {
+            background: var(--surface-card);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .score-circle {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            margin-bottom: 12px;
+            background: conic-gradient(var(--accent-green) 0% 92%, rgba(255, 255, 255, 0.08) 92% 100%);
+            box-shadow: 0 0 25px rgba(0, 230, 118, 0.2);
+            transition: all 0.4s ease;
+        }
+
+        .score-inner {
+            width: 102px;
+            height: 102px;
+            border-radius: 50%;
+            background: var(--surface-card);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .score-number {
+            font-size: 28px;
+            font-weight: 800;
+            letter-spacing: -1px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .score-label {
+            font-size: 11px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+
+        .status-pill {
+            font-size: 12px;
+            font-weight: 700;
+            padding: 4px 14px;
+            border-radius: 20px;
+            letter-spacing: 0.5px;
+            margin-bottom: 6px;
+        }
+
+        .action-banner {
+            font-size: 12px;
+            font-weight: 600;
+            color: #d0dbe8;
+        }
+
+        /* Metrics Progress Bars */
+        .bars-card {
+            background: var(--surface-card);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+        }
+
+        .metric-row {
+            margin-bottom: 12px;
+        }
+
+        .metric-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .metric-label-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            margin-bottom: 5px;
+            color: var(--text-muted);
+        }
+
+        .metric-val {
+            font-weight: 600;
+            color: var(--text-main);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .progress-track {
+            height: 7px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.4s ease, background 0.4s ease;
+        }
+
+        /* Perception Impact Card */
+        .impact-card {
+            background: var(--surface-card);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+        }
+
+        .stat-box-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .stat-box {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-color);
+            padding: 12px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .stat-num {
+            font-size: 22px;
+            font-weight: 800;
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--accent-blue);
+        }
+
+        .stat-desc {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo-area">
+            <span class="logo-badge">TOPIC T1</span>
+            <div>
+                <span class="logo-title">ADAS Camera Degradation Health Monitor</span>
+                <span class="logo-sub">nuScenes-C / KITTI-C Robustness</span>
+            </div>
+        </div>
+        <div class="nav-actions">
+            <a href="/slide" class="btn-slide">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="14" x="3" y="3" rx="2"/><path d="M7 21h10"/><path d="M12 17v4"/></svg>
+                Trình chiếu Slide (1-Page)
+            </a>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- Sidebar Controls -->
+        <aside class="sidebar">
+            <div class="panel">
+                <div class="panel-title">1. Chọn cảnh lái xe mẫu</div>
+                <div class="presets-grid" id="presets-container">
+                    <button class="preset-btn active" data-img="day_drive.jpg">🚌 Xe buýt đô thị</button>
+                    <button class="preset-btn" data-img="highway_adas.jpg">🛣️ Cao tốc ban ngày</button>
+                    <button class="preset-btn" data-img="road_traffic.jpg">🚗 Giao lộ đông đúc</button>
+                    <button class="preset-btn" data-img="night_drive.jpg">🌙 Cao tốc ban đêm</button>
+                </div>
+
+                <div class="upload-dropzone" id="dropzone">
+                    <input type="file" id="file-input" accept="image/*">
+                    <div class="upload-icon">📁</div>
+                    <div class="upload-text"><strong>Nhấp tải ảnh lên</strong> hoặc kéo thả ảnh vào đây</div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-title">2. Loại suy giảm cảm biến (nuScenes-C)</div>
+                <div class="deg-options">
+                    <button class="deg-btn active" data-deg="none">✨ Nguyên bản (Clean)</button>
+                    <button class="deg-btn" data-deg="blur">💫 Mờ (Motion Blur)</button>
+                    <button class="deg-btn" data-deg="glare">☀️ Chói sáng (Sun Glare)</button>
+                    <button class="deg-btn" data-deg="darkness">🌑 Đêm tối (Shot Noise)</button>
+                    <button class="deg-btn" data-deg="rain">🌧️ Mưa giông (Rain/Fog)</button>
+                    <button class="deg-btn" data-deg="soiling">💩 Bùn bẩn kính (Soiling)</button>
+                </div>
+
+                <div class="slider-wrapper">
+                    <div class="slider-header">
+                        <span>Mức độ nghiêm trọng (Severity):</span>
+                        <span class="severity-badge" id="severity-label">Level 3</span>
+                    </div>
+                    <input type="range" id="severity-slider" min="1" max="5" value="3" step="1">
+                </div>
+
+                <label class="toggle-row">
+                    <span>Chạy Object Detector (YOLOv8n)</span>
+                    <input type="checkbox" id="detector-toggle" checked style="width: 18px; height: 18px; cursor: pointer;">
+                </label>
+            </div>
+        </aside>
+
+        <!-- Main Viewport & Telemetry -->
+        <main class="main-content">
+            <div class="hud-card">
+                <div class="view-tabs">
+                    <button class="view-tab active" data-view="hud">ADAS HUD (Phát hiện vật thể + Chẩn đoán)</button>
+                    <button class="view-tab" data-view="degraded">Ảnh suy giảm (Degraded Frame)</button>
+                </div>
+                <div class="viewport">
+                    <div class="spinner" id="spinner"></div>
+                    <img id="main-image" src="" alt="ADAS Camera Viewport">
+                </div>
+            </div>
+
+            <!-- Telemetry & Analytics Grid -->
+            <div class="telemetry-grid">
+                <!-- Circular Health Gauge -->
+                <div class="gauge-card">
+                    <div class="score-circle" id="score-circle">
+                        <div class="score-inner">
+                            <span class="score-number" id="health-score-val">92.1</span>
+                            <span class="score-label">Health Score</span>
+                        </div>
+                    </div>
+                    <div class="status-pill" id="status-pill" style="background: rgba(0, 230, 118, 0.2); color: #00e676;">
+                        HEALTHY
+                    </div>
+                    <div class="action-banner" id="action-banner">
+                        Hành động: FULL_CONFIDENCE
+                    </div>
+                    <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;" id="fusion-weight-text">
+                        Trọng số Fusion: 1.00
+                    </div>
+                </div>
+
+                <!-- Metrics Breakdown Bars -->
+                <div class="bars-card">
+                    <div class="panel-title" style="margin-bottom: 6px;">Chỉ số thành phần (No-Reference)</div>
+                    
+                    <div class="metric-row">
+                        <div class="metric-label-row">
+                            <span>Độ sắc nét (Noise-Robust Sharpness)</span>
+                            <span class="metric-val" id="val-blur">0.95</span>
+                        </div>
+                        <div class="progress-track"><div class="progress-fill" id="bar-blur" style="width: 95%; background: var(--accent-green);"></div></div>
+                    </div>
+
+                    <div class="metric-row">
+                        <div class="metric-label-row">
+                            <span>Chất lượng phơi sáng (Exposure Quality)</span>
+                            <span class="metric-val" id="val-exposure">0.92</span>
+                        </div>
+                        <div class="progress-track"><div class="progress-fill" id="bar-exposure" style="width: 92%; background: var(--accent-green);"></div></div>
+                    </div>
+
+                    <div class="metric-row">
+                        <div class="metric-label-row">
+                            <span>Mật độ thông tin (Shannon Entropy)</span>
+                            <span class="metric-val" id="val-entropy">0.89</span>
+                        </div>
+                        <div class="progress-track"><div class="progress-fill" id="bar-entropy" style="width: 89%; background: var(--accent-green);"></div></div>
+                    </div>
+
+                    <div class="metric-row">
+                        <div class="metric-label-row">
+                            <span>Bùn bẩn bám kính (Soiling Penalty)</span>
+                            <span class="metric-val" id="val-soiling">0.00</span>
+                        </div>
+                        <div class="progress-track"><div class="progress-fill" id="bar-soiling" style="width: 0%; background: var(--accent-red);"></div></div>
+                    </div>
+                </div>
+
+                <!-- Perception Impact -->
+                <div class="impact-card">
+                    <div class="panel-title" style="margin-bottom: 6px;">Tác động Perception (YOLOv8n)</div>
+                    <div class="stat-box-grid">
+                        <div class="stat-box">
+                            <div class="stat-num" id="stat-detections">6</div>
+                            <div class="stat-desc">Vật thể phát hiện</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-num" id="stat-conf">0.66</div>
+                            <div class="stat-desc">Độ tự tin TB (Conf)</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-num" id="stat-scorer-latency">2.3 ms</div>
+                            <div class="stat-desc">Độ trễ Health Scorer</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-num" id="stat-yolo-latency">67.0 ms</div>
+                            <div class="stat-desc">Độ trễ YOLOv8n</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // State
+        let currentSource = 'day_drive.jpg';
+        let currentDeg = 'none';
+        let currentSeverity = 3;
+        let currentView = 'hud';
+        let latestResponse = null;
+
+        // Elements
+        const mainImage = document.getElementById('main-image');
+        const spinner = document.getElementById('spinner');
+        const severitySlider = document.getElementById('severity-slider');
+        const severityLabel = document.getElementById('severity-label');
+        const detectorToggle = document.getElementById('detector-toggle');
+        const dropzone = document.getElementById('dropzone');
+        const fileInput = document.getElementById('file-input');
+
+        // Presets Click
+        document.querySelectorAll('.preset-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentSource = btn.dataset.img;
+                triggerEvaluation();
+            });
+        });
+
+        // Degradation Click
+        document.querySelectorAll('.deg-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.deg-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentDeg = btn.dataset.deg;
+                triggerEvaluation();
+            });
+        });
+
+        // Severity Slider
+        severitySlider.addEventListener('input', (e) => {
+            currentSeverity = parseInt(e.target.value);
+            severityLabel.textContent = `Level ${currentSeverity}`;
+            triggerEvaluation();
+        });
+
+        // Detector Toggle
+        detectorToggle.addEventListener('change', () => {
+            triggerEvaluation();
+        });
+
+        // View Tabs
+        document.querySelectorAll('.view-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.view-tab').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                currentView = tab.dataset.view;
+                updateViewImage();
+            });
+        });
+
+        // File Upload
+        dropzone.addEventListener('click', () => fileInput.click());
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    currentSource = event.target.result;
+                    document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+                    triggerEvaluation();
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Drag & Drop
+        dropzone.addEventListener('dragover', (e) => { e.preventDefault(); dropzone.style.borderColor = '#0084ff'; });
+        dropzone.addEventListener('dragleave', () => { dropzone.style.borderColor = 'rgba(255,255,255,0.15)'; });
+        dropzone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropzone.style.borderColor = 'rgba(255,255,255,0.15)';
+            const file = e.dataTransfer.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    currentSource = event.target.result;
+                    document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+                    triggerEvaluation();
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // API Call
+        async function triggerEvaluation() {
+            spinner.style.display = 'block';
+            mainImage.style.opacity = '0.5';
+
+            try {
+                const res = await fetch('/api/evaluate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        image_source: currentSource,
+                        deg_type: currentDeg,
+                        severity: currentSeverity,
+                        run_detector: detectorToggle.checked
+                    })
+                });
+
+                const data = await res.json();
+                latestResponse = data;
+                renderTelemetry(data);
+                updateViewImage();
+            } catch (err) {
+                console.error(err);
+            } finally {
+                spinner.style.display = 'none';
+                mainImage.style.opacity = '1.0';
+            }
+        }
+
+        function updateViewImage() {
+            if (!latestResponse) return;
+            if (currentView === 'hud') {
+                mainImage.src = latestResponse.hud_image;
+            } else {
+                mainImage.src = latestResponse.degraded_image;
+            }
+        }
+
+        function renderTelemetry(data) {
+            // Health Score & Circle
+            const score = data.health_score;
+            document.getElementById('health-score-val').textContent = score.toFixed(1);
+
+            let color = '#00e676';
+            let pillBg = 'rgba(0, 230, 118, 0.2)';
+            if (data.status === 'DEGRADED') {
+                color = '#ffb300';
+                pillBg = 'rgba(255, 179, 0, 0.2)';
+            } else if (data.status === 'CRITICAL') {
+                color = '#ff3d00';
+                pillBg = 'rgba(255, 61, 0, 0.2)';
+            }
+
+            const circle = document.getElementById('score-circle');
+            circle.style.background = `conic-gradient(${color} 0% ${score}%, rgba(255, 255, 255, 0.08) ${score}% 100%)`;
+            circle.style.boxShadow = `0 0 25px ${color}44`;
+
+            const pill = document.getElementById('status-pill');
+            pill.textContent = data.status;
+            pill.style.background = pillBg;
+            pill.style.color = color;
+
+            document.getElementById('action-banner').textContent = `Hành động: ${data.action}`;
+            document.getElementById('fusion-weight-text').textContent = `Trọng số Fusion: ${data.camera_fusion_weight.toFixed(2)}`;
+
+            // Bars
+            setBar('blur', data.blur_score, data.blur_score > 0.6 ? '#00e676' : '#ff3d00');
+            setBar('exposure', data.exposure_score, data.exposure_score > 0.6 ? '#00e676' : '#ff3d00');
+            setBar('entropy', data.entropy_score, data.entropy_score > 0.6 ? '#00e676' : '#ffb300');
+            setBar('soiling', data.soiling_penalty, data.soiling_penalty < 0.2 ? '#00e676' : '#ff3d00');
+
+            // Perception stats
+            document.getElementById('stat-detections').textContent = data.detector.num_detections;
+            document.getElementById('stat-conf').textContent = data.detector.mean_confidence.toFixed(2);
+            document.getElementById('stat-scorer-latency').textContent = `${data.scorer_latency_ms.toFixed(1)} ms`;
+            document.getElementById('stat-yolo-latency').textContent = `${data.detector.latency_ms.toFixed(1)} ms`;
+        }
+
+        function setBar(id, val, color) {
+            const pct = Math.min(100, Math.max(0, val * 100));
+            document.getElementById(`val-${id}`).textContent = val.toFixed(2);
+            const fill = document.getElementById(`bar-${id}`);
+            fill.style.width = `${pct}%`;
+            fill.style.background = color;
+        }
+
+        // Initial Load
+        window.addEventListener('DOMContentLoaded', () => {
+            triggerEvaluation();
+        });
+    </script>
+</body>
+</html>
