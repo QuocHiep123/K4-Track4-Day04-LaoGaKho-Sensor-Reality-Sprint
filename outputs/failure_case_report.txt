@@ -1,0 +1,8 @@
+--- FAILURE CASE DEMO REPORT ---
+Scene: Valid Night Driving (Lit Road & Taillights)
+Computed Health Score: 47.6/100
+Status Assigned: DEGRADED
+Reasons: ['blur_or_defocus', 'severe_underexposure']
+Underexposed Pixel Ratio: 45.8%
+Root Cause: Global histogram assumes daylight baseline. 80%+ pixels are legitimately dark at night.
+Recommended Fix: Adaptive Day/Night thresholding via camera ambient illuminance or exposure metadata.
