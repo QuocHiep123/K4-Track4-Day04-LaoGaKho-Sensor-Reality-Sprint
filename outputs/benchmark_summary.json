@@ -1,0 +1,70 @@
+{
+  "sample_count": 100,
+  "thresholds": {
+    "healthy_min": 70,
+    "degraded_min": 40
+  },
+  "degradations": {
+    "blur": {
+      "mean_health_by_severity": [
+        93.96,
+        87.22,
+        54.87,
+        20.89,
+        20.9
+      ],
+      "severity_health_correlation": -0.9616,
+      "monotonic_violations": 0,
+      "expected_trend_pass": true
+    },
+    "fog": {
+      "mean_health_by_severity": [
+        93.96,
+        93.72,
+        87.61,
+        66.09,
+        22.13
+      ],
+      "severity_health_correlation": -0.8884,
+      "monotonic_violations": 0,
+      "expected_trend_pass": true
+    },
+    "noise": {
+      "mean_health_by_severity": [
+        93.96,
+        92.46,
+        86.41,
+        72.91,
+        43.22
+      ],
+      "severity_health_correlation": -0.9097,
+      "monotonic_violations": 0,
+      "expected_trend_pass": true
+    },
+    "overexposure": {
+      "mean_health_by_severity": [
+        93.96,
+        84.63,
+        73.26,
+        47.27,
+        35.28
+      ],
+      "severity_health_correlation": -0.984,
+      "monotonic_violations": 0,
+      "expected_trend_pass": true
+    },
+    "underexposure": {
+      "mean_health_by_severity": [
+        93.96,
+        91.69,
+        85.18,
+        76.63,
+        64.29
+      ],
+      "severity_health_correlation": -0.9695,
+      "monotonic_violations": 0,
+      "expected_trend_pass": true
+    }
+  },
+  "note": "Negative correlation means health decreases as corruption severity increases."
+}
