@@ -162,7 +162,8 @@ def benchmark(path, use_yolo, outdir="results"):
     for c, f in CORRUPTIONS.items():
         row = [img] + [f(img, s) for s in (1, 3, 5)]
         row = [overlay(im.copy(), f"{c} L{s}" if s else "clean") for im, s in zip(row, (0, 1, 3, 5))]
-        tiles.append(np.hstack([cv2.resize(t, (320, 240)) for t in row]))
+        tw = int(240 * img.shape[1] / img.shape[0])
+        tiles.append(np.hstack([cv2.resize(t, (tw, 240)) for t in row]))
     cv2.imwrite(f"{outdir}/samples_grid.jpg", np.vstack(tiles))
     print(f"\nDa luu ket qua vao thu muc '{outdir}/'")
 
